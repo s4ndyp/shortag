@@ -1,5 +1,9 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import type ShortagPlugin from "../main";
+import {
+	DEFAULT_BACKGROUND_COLOR_HEX,
+	DEFAULT_TEXT_COLOR_HEX,
+} from "./settings";
 
 export class ShortagSettingTab extends PluginSettingTab {
 	plugin: ShortagPlugin;
@@ -97,12 +101,40 @@ export class ShortagSettingTab extends PluginSettingTab {
 					}),
 			);
 
-		this.addStyleTextSetting("Tekstkleur", "textColor");
-		this.addStyleTextSetting("Achtergrondkleur", "backgroundColor");
+		this.addStyleColorSetting(
+			"Tekstkleur",
+			"textColor",
+			DEFAULT_TEXT_COLOR_HEX,
+			"Hex-kleur voor afgekorte tags. Klik op het gekleurde rondje voor de picker.",
+		);
+		this.addStyleColorSetting(
+			"Achtergrondkleur",
+			"backgroundColor",
+			DEFAULT_BACKGROUND_COLOR_HEX,
+			"Hex-kleur voor de achtergrond van afgekorte tags.",
+		);
 		this.addStyleTextSetting("Letterdikte", "fontWeight", "500");
 		this.addStyleTextSetting("Tekstdecoratie", "textDecoration", "none");
 		this.addStyleTextSetting("Hoekradius", "borderRadius", "4px");
 		this.addStyleTextSetting("Padding", "padding", "0 4px");
+	}
+
+	private addStyleColorSetting(
+		name: string,
+		key: "textColor" | "backgroundColor",
+		fallbackHex: string,
+		desc?: string,
+	): void {
+		const setting = new Setting(this.containerEl).setName(name);
+		if (desc) setting.setDesc(desc);
+		setting.addColorPicker((picker) =>
+			picker
+				.setValue(this.plugin.settings.style[key] || fallbackHex)
+				.onChange(async (hex) => {
+					this.plugin.settings.style[key] = hex;
+					await this.plugin.saveSettings();
+				}),
+		);
 	}
 
 	private addStyleTextSetting(
