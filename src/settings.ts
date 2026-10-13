@@ -1,4 +1,5 @@
 import { toPickerHex } from "./colorUtils";
+import { normalizeTextDecoration } from "./textDecorationOptions";
 import type { ShortagSettings } from "./types";
 
 export const DEFAULT_TEXT_COLOR_HEX = "#7c3aed";
@@ -61,6 +62,7 @@ export function normalizeSettings(
 			raw.style.backgroundColor,
 			DEFAULT_BACKGROUND_COLOR_HEX,
 		);
+		base.style.textDecoration = normalizeTextDecoration(raw.style.textDecoration);
 	}
 	if (typeof raw?.minSegments === "number" && raw.minSegments >= 1) {
 		base.minSegments = Math.floor(raw.minSegments);

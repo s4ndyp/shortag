@@ -7,8 +7,10 @@ import {
 	ViewPlugin,
 	ViewUpdate,
 } from "@codemirror/view";
+import type { App } from "obsidian";
 import { buildDecorations } from "./decorations";
 import { DEFAULT_SETTINGS } from "./settings";
+import { openTagSearch } from "./tagSearch";
 import {
 	isTagSyntaxNode,
 	NESTED_TAG_REGEX,
@@ -151,9 +153,28 @@ export class ShortagCMPlugin implements PluginValue {
 }
 
 let settingsGetter: SettingsGetter = () => DEFAULT_SETTINGS;
+let appRef: App | undefined;
 
 export function setShortagSettingsGetter(getter: SettingsGetter): void {
 	settingsGetter = getter;
+}
+
+export function setShortagApp(app: App): void {
+	appRef = app;
+}
+
+function handleShortagTagClick(e: Event): void {
+	const target = (e.target as HTMLElement | null)?.closest(
+		"[data-shortag-full]",
+	) as HTMLElement | null;
+	if (!target) return;
+
+	const fullTag = target.dataset.shortagFull;
+	if (!fullTag || !appRef) return;
+
+	e.preventDefault();
+	e.stopPropagation();
+	openTagSearch(appRef, fullTag);
 }
 
 export const shortagCMPlugin = ViewPlugin.fromClass(
@@ -164,5 +185,8 @@ export const shortagCMPlugin = ViewPlugin.fromClass(
 	},
 	{
 		decorations: (v) => v.decorations,
+		eventHandlers: {
+			click: (e) => handleShortagTagClick(e),
+		},
 	},
 );

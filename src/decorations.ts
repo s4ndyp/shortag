@@ -9,6 +9,7 @@ import type { ShortagSettings } from "./types";
 class ShortTagWidget extends WidgetType {
 	constructor(
 		readonly displayText: string,
+		readonly fullTagText: string,
 		readonly applyCustomStyle: boolean,
 	) {
 		super();
@@ -16,22 +17,25 @@ class ShortTagWidget extends WidgetType {
 
 	toDOM(): HTMLElement {
 		const span = document.createElement("span");
-		span.className = "shortag-display";
+		span.className = "shortag-display cm-hashtag";
 		if (!this.applyCustomStyle) {
 			span.classList.add("shortag-display-native");
 		}
 		span.textContent = this.displayText;
-		span.setAttribute("aria-label", this.displayText);
+		span.dataset.shortagFull = this.fullTagText;
+		span.setAttribute("aria-label", this.fullTagText);
+		span.title = this.fullTagText;
 		return span;
 	}
 
 	ignoreEvent(): boolean {
-		return true;
+		return false;
 	}
 
 	eq(other: ShortTagWidget): boolean {
 		return (
 			other.displayText === this.displayText &&
+			other.fullTagText === this.fullTagText &&
 			other.applyCustomStyle === this.applyCustomStyle
 		);
 	}
@@ -52,6 +56,7 @@ export function buildDecorations(
 			Decoration.replace({
 				widget: new ShortTagWidget(
 					match.displayText,
+					match.fullText,
 					settings.applyCustomStyle,
 				),
 				inclusive: false,

@@ -1,6 +1,6 @@
 {
 	"name": "shortag",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Obsidian plugin: geneste tags afgekort in de editor.",
 	"main": "main.js",
 	"scripts": {
