@@ -11,10 +11,6 @@ import {
 	DEFAULT_BACKGROUND_COLOR_HEX,
 	DEFAULT_TEXT_COLOR_HEX,
 } from "./settings";
-import {
-	TEXT_DECORATION_OPTIONS,
-	normalizeTextDecoration,
-} from "./textDecorationOptions";
 
 export class ShortagSettingTab extends PluginSettingTab {
 	plugin: ShortagPlugin;
@@ -101,7 +97,7 @@ export class ShortagSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Eigen styling toepassen")
 			.setDesc(
-				"Overschrijft de standaard Obsidian tag-styling voor afgekorte tags in de editor.",
+				"Overschrijft kleur en achtergrond van afgekorte tags in de editor. Letterdikte en decoratie blijven zoals bij normale tags.",
 			)
 			.addToggle((toggle) =>
 				toggle
@@ -124,29 +120,8 @@ export class ShortagSettingTab extends PluginSettingTab {
 			DEFAULT_BACKGROUND_COLOR_HEX,
 			"Achtergrond via het rondje of typ een hex-waarde.",
 		);
-		this.addStyleTextSetting("Letterdikte", "fontWeight", "500");
-		this.addTextDecorationSetting();
 		this.addStyleTextSetting("Hoekradius", "borderRadius", "4px");
 		this.addStyleTextSetting("Padding", "padding", "0 4px");
-	}
-
-	private addTextDecorationSetting(): void {
-		const current = normalizeTextDecoration(
-			this.plugin.settings.style.textDecoration,
-		);
-		new Setting(this.containerEl)
-			.setName("Tekstdecoratie")
-			.setDesc("Hoe de afgekorte tag extra wordt gemarkeerd.")
-			.addDropdown((dropdown) => {
-				for (const opt of TEXT_DECORATION_OPTIONS) {
-					dropdown.addOption(opt.value, opt.label);
-				}
-				dropdown.setValue(current).onChange(async (v) => {
-					this.plugin.settings.style.textDecoration =
-						normalizeTextDecoration(v);
-					await this.plugin.saveSettings();
-				});
-			});
 	}
 
 	private addStyleColorSetting(
@@ -203,7 +178,7 @@ export class ShortagSettingTab extends PluginSettingTab {
 					.setPlaceholder(placeholder ?? "")
 					.setValue(this.plugin.settings.style[key])
 					.onChange(async (v) => {
-						this.plugin.settings.style[key] = v as never;
+						this.plugin.settings.style[key] = v;
 						await this.plugin.saveSettings();
 					}),
 			);

@@ -6,6 +6,14 @@ import {
 import type { NestedTagMatch } from "./types";
 import type { ShortagSettings } from "./types";
 
+type TagActivateHandler = (fullTagText: string) => void;
+
+let onTagActivate: TagActivateHandler | undefined;
+
+export function setShortagTagActivateHandler(handler: TagActivateHandler): void {
+	onTagActivate = handler;
+}
+
 class ShortTagWidget extends WidgetType {
 	constructor(
 		readonly displayText: string,
@@ -25,11 +33,22 @@ class ShortTagWidget extends WidgetType {
 		span.dataset.shortagFull = this.fullTagText;
 		span.setAttribute("aria-label", this.fullTagText);
 		span.title = this.fullTagText;
+
+		const openSearch = (e: Event): void => {
+			e.preventDefault();
+			e.stopPropagation();
+			onTagActivate?.(this.fullTagText);
+		};
+		span.addEventListener("mousedown", openSearch);
+		span.addEventListener("auxclick", (e) => {
+			if (e.button === 1) openSearch(e);
+		});
+
 		return span;
 	}
 
 	ignoreEvent(): boolean {
-		return false;
+		return true;
 	}
 
 	eq(other: ShortTagWidget): boolean {

@@ -8,7 +8,7 @@ import {
 	ViewUpdate,
 } from "@codemirror/view";
 import type { App } from "obsidian";
-import { buildDecorations } from "./decorations";
+import { buildDecorations, setShortagTagActivateHandler } from "./decorations";
 import { DEFAULT_SETTINGS } from "./settings";
 import { openTagSearch } from "./tagSearch";
 import {
@@ -161,20 +161,9 @@ export function setShortagSettingsGetter(getter: SettingsGetter): void {
 
 export function setShortagApp(app: App): void {
 	appRef = app;
-}
-
-function handleShortagTagClick(e: Event): void {
-	const target = (e.target as HTMLElement | null)?.closest(
-		"[data-shortag-full]",
-	) as HTMLElement | null;
-	if (!target) return;
-
-	const fullTag = target.dataset.shortagFull;
-	if (!fullTag || !appRef) return;
-
-	e.preventDefault();
-	e.stopPropagation();
-	openTagSearch(appRef, fullTag);
+	setShortagTagActivateHandler((fullTag) => {
+		if (appRef) openTagSearch(appRef, fullTag);
+	});
 }
 
 export const shortagCMPlugin = ViewPlugin.fromClass(
@@ -185,8 +174,5 @@ export const shortagCMPlugin = ViewPlugin.fromClass(
 	},
 	{
 		decorations: (v) => v.decorations,
-		eventHandlers: {
-			click: (e) => handleShortagTagClick(e),
-		},
 	},
 );
