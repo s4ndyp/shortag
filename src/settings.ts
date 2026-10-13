@@ -1,5 +1,4 @@
 import { toPickerHex } from "./colorUtils";
-import { normalizeTextDecoration } from "./textDecorationOptions";
 import type { ShortagSettings } from "./types";
 
 export const DEFAULT_TEXT_COLOR_HEX = "#7c3aed";
@@ -14,8 +13,6 @@ export const DEFAULT_SETTINGS: ShortagSettings = {
 	style: {
 		textColor: DEFAULT_TEXT_COLOR_HEX,
 		backgroundColor: DEFAULT_BACKGROUND_COLOR_HEX,
-		fontWeight: "500",
-		textDecoration: "none",
 		borderRadius: "4px",
 		padding: "0 4px",
 	},
@@ -41,8 +38,6 @@ export function applyShortagStyles(settings: ShortagSettings): void {
 .cm-editor .shortag-display {
 	color: ${s.textColor} !important;
 	background-color: ${s.backgroundColor} !important;
-	font-weight: ${s.fontWeight} !important;
-	text-decoration: ${s.textDecoration} !important;
 	border-radius: ${s.borderRadius};
 	padding: ${s.padding};
 }`;
@@ -53,16 +48,22 @@ export function normalizeSettings(
 ): ShortagSettings {
 	const base = Object.assign({}, DEFAULT_SETTINGS, raw);
 	if (raw?.style) {
-		base.style = Object.assign({}, DEFAULT_SETTINGS.style, raw.style);
-		base.style.textColor = toPickerHex(
-			raw.style.textColor,
-			DEFAULT_TEXT_COLOR_HEX,
-		);
-		base.style.backgroundColor = toPickerHex(
-			raw.style.backgroundColor,
-			DEFAULT_BACKGROUND_COLOR_HEX,
-		);
-		base.style.textDecoration = normalizeTextDecoration(raw.style.textDecoration);
+		const merged = Object.assign({}, DEFAULT_SETTINGS.style, raw.style);
+		base.style = {
+			textColor: toPickerHex(merged.textColor, DEFAULT_TEXT_COLOR_HEX),
+			backgroundColor: toPickerHex(
+				merged.backgroundColor,
+				DEFAULT_BACKGROUND_COLOR_HEX,
+			),
+			borderRadius:
+				typeof merged.borderRadius === "string" && merged.borderRadius.trim()
+					? merged.borderRadius.trim()
+					: DEFAULT_SETTINGS.style.borderRadius,
+			padding:
+				typeof merged.padding === "string" && merged.padding.trim()
+					? merged.padding.trim()
+					: DEFAULT_SETTINGS.style.padding,
+		};
 	}
 	if (typeof raw?.minSegments === "number" && raw.minSegments >= 1) {
 		base.minSegments = Math.floor(raw.minSegments);
