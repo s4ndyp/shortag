@@ -1,5 +1,6 @@
 import { Plugin } from "obsidian";
 import {
+	setShortagApp,
 	setShortagSettingsGetter,
 	shortagCMPlugin,
 } from "./src/editorExtension";
@@ -16,6 +17,7 @@ export default class ShortagPlugin extends Plugin {
 
 	async onload(): Promise<void> {
 		await this.loadSettings();
+		setShortagApp(this.app);
 		setShortagSettingsGetter(() => this.settings);
 		applyShortagStyles(this.settings);
 		this.registerEditorExtension(shortagCMPlugin);

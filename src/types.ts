@@ -1,8 +1,10 @@
+import type { TextDecorationOption } from "./textDecorationOptions";
+
 export interface ShortagStyleSettings {
 	textColor: string;
 	backgroundColor: string;
 	fontWeight: string;
-	textDecoration: string;
+	textDecoration: TextDecorationOption;
 	borderRadius: string;
 	padding: string;
 }

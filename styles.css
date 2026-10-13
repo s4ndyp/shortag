@@ -1,7 +1,7 @@
 .shortag-display {
 	display: inline;
 	vertical-align: baseline;
-	cursor: text;
+	cursor: pointer;
 }
 
 .shortag-display-native {
