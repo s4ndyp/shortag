@@ -1,0 +1,12 @@
+.shortag-display {
+	display: inline;
+	vertical-align: baseline;
+	cursor: text;
+}
+
+.shortag-display-native {
+	/* Geen plugin-kleuren; Obsidian tag-styling blijft actief waar mogelijk. */
+	color: inherit;
+	background: transparent;
+	font-weight: inherit;
+}

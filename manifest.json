@@ -1,0 +1,9 @@
+{
+	"id": "shortag",
+	"name": "Shortag",
+	"version": "0.1.0",
+	"minAppVersion": "1.5.0",
+	"description": "Toon geneste Obsidian-tags in de editor afgekort (alleen het laatste segment), met eigen styling.",
+	"author": "s4ndyp",
+	"isDesktopOnly": false
+}
