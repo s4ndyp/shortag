@@ -1,4 +1,8 @@
+import { toPickerHex } from "./colorUtils";
 import type { ShortagSettings } from "./types";
+
+export const DEFAULT_TEXT_COLOR_HEX = "#7c3aed";
+export const DEFAULT_BACKGROUND_COLOR_HEX = "#ede9fe";
 
 export const DEFAULT_SETTINGS: ShortagSettings = {
 	enabled: true,
@@ -7,8 +11,8 @@ export const DEFAULT_SETTINGS: ShortagSettings = {
 	showHash: true,
 	applyCustomStyle: true,
 	style: {
-		textColor: "var(--tag-color, var(--text-accent))",
-		backgroundColor: "rgba(var(--color-accent-rgb), 0.12)",
+		textColor: DEFAULT_TEXT_COLOR_HEX,
+		backgroundColor: DEFAULT_BACKGROUND_COLOR_HEX,
 		fontWeight: "500",
 		textDecoration: "none",
 		borderRadius: "4px",
@@ -49,6 +53,14 @@ export function normalizeSettings(
 	const base = Object.assign({}, DEFAULT_SETTINGS, raw);
 	if (raw?.style) {
 		base.style = Object.assign({}, DEFAULT_SETTINGS.style, raw.style);
+		base.style.textColor = toPickerHex(
+			raw.style.textColor,
+			DEFAULT_TEXT_COLOR_HEX,
+		);
+		base.style.backgroundColor = toPickerHex(
+			raw.style.backgroundColor,
+			DEFAULT_BACKGROUND_COLOR_HEX,
+		);
 	}
 	if (typeof raw?.minSegments === "number" && raw.minSegments >= 1) {
 		base.minSegments = Math.floor(raw.minSegments);
