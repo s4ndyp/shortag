@@ -5,6 +5,13 @@ export interface ShortagStyleSettings {
 	padding: string;
 }
 
+/** Opgeslagen styling + toggle eigen styling. */
+export interface StylePresetSlot {
+	applyCustomStyle: boolean;
+	style: ShortagStyleSettings;
+	savedAt?: number;
+}
+
 export interface ShortagSettings {
 	enabled: boolean;
 	/** Minimaal aantal segmenten (gescheiden door separator) voordat wordt afgekort. */
@@ -16,6 +23,8 @@ export interface ShortagSettings {
 	/** Eigen CSS-styling toepassen (overschrijft Obsidian tag-styling in de editor). */
 	applyCustomStyle: boolean;
 	style: ShortagStyleSettings;
+	/** Twee slots om styling te bewaren en later terug te zetten. */
+	stylePresets: (StylePresetSlot | null)[];
 	ignoreCodeblocks: boolean;
 }
 

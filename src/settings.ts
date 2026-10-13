@@ -1,5 +1,10 @@
 import { toPickerHex } from "./colorUtils";
-import type { ShortagSettings } from "./types";
+import { emptyStylePresets, STYLE_PRESET_COUNT } from "./stylePresets";
+import type {
+	ShortagSettings,
+	ShortagStyleSettings,
+	StylePresetSlot,
+} from "./types";
 
 export const DEFAULT_TEXT_COLOR_HEX = "#7c3aed";
 export const DEFAULT_BACKGROUND_COLOR_HEX = "#ede9fe";
@@ -16,8 +21,53 @@ export const DEFAULT_SETTINGS: ShortagSettings = {
 		borderRadius: "4px",
 		padding: "0 4px",
 	},
+	stylePresets: emptyStylePresets(),
 	ignoreCodeblocks: true,
 };
+
+export function normalizeStyleSettings(
+	raw: Partial<ShortagStyleSettings> | null | undefined,
+): ShortagStyleSettings {
+	const merged = Object.assign({}, DEFAULT_SETTINGS.style, raw);
+	return {
+		textColor: toPickerHex(merged.textColor, DEFAULT_TEXT_COLOR_HEX),
+		backgroundColor: toPickerHex(
+			merged.backgroundColor,
+			DEFAULT_BACKGROUND_COLOR_HEX,
+		),
+		borderRadius:
+			typeof merged.borderRadius === "string" && merged.borderRadius.trim()
+				? merged.borderRadius.trim()
+				: DEFAULT_SETTINGS.style.borderRadius,
+		padding:
+			typeof merged.padding === "string" && merged.padding.trim()
+				? merged.padding.trim()
+				: DEFAULT_SETTINGS.style.padding,
+	};
+}
+
+function cloneStylePresets(raw: unknown): (StylePresetSlot | null)[] {
+	const slots = emptyStylePresets();
+	if (!Array.isArray(raw)) return slots;
+	for (let i = 0; i < STYLE_PRESET_COUNT; i++) {
+		const item = raw[i];
+		if (!item || typeof item !== "object") continue;
+		const rec = item as Record<string, unknown>;
+		if (!rec.style || typeof rec.style !== "object") continue;
+		slots[i] = {
+			applyCustomStyle:
+				typeof rec.applyCustomStyle === "boolean"
+					? rec.applyCustomStyle
+					: true,
+			style: normalizeStyleSettings(
+				rec.style as Partial<ShortagStyleSettings>,
+			),
+			savedAt:
+				typeof rec.savedAt === "number" ? rec.savedAt : undefined,
+		};
+	}
+	return slots;
+}
 
 export function applyShortagStyles(settings: ShortagSettings): void {
 	const styleId = "shortag-dynamic-styles";
@@ -48,23 +98,9 @@ export function normalizeSettings(
 ): ShortagSettings {
 	const base = Object.assign({}, DEFAULT_SETTINGS, raw);
 	if (raw?.style) {
-		const merged = Object.assign({}, DEFAULT_SETTINGS.style, raw.style);
-		base.style = {
-			textColor: toPickerHex(merged.textColor, DEFAULT_TEXT_COLOR_HEX),
-			backgroundColor: toPickerHex(
-				merged.backgroundColor,
-				DEFAULT_BACKGROUND_COLOR_HEX,
-			),
-			borderRadius:
-				typeof merged.borderRadius === "string" && merged.borderRadius.trim()
-					? merged.borderRadius.trim()
-					: DEFAULT_SETTINGS.style.borderRadius,
-			padding:
-				typeof merged.padding === "string" && merged.padding.trim()
-					? merged.padding.trim()
-					: DEFAULT_SETTINGS.style.padding,
-		};
+		base.style = normalizeStyleSettings(raw.style);
 	}
+	base.stylePresets = cloneStylePresets(raw?.stylePresets);
 	if (typeof raw?.minSegments === "number" && raw.minSegments >= 1) {
 		base.minSegments = Math.floor(raw.minSegments);
 	}
@@ -73,3 +109,5 @@ export function normalizeSettings(
 	}
 	return base;
 }
+
+export { captureStylePreset, applyStylePreset } from "./stylePresets";

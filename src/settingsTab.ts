@@ -8,9 +8,13 @@ import {
 import type ShortagPlugin from "../main";
 import { isHexColor, toPickerHex } from "./colorUtils";
 import {
+	applyStylePreset,
+	captureStylePreset,
 	DEFAULT_BACKGROUND_COLOR_HEX,
 	DEFAULT_TEXT_COLOR_HEX,
+	normalizeStyleSettings,
 } from "./settings";
+import { presetSummary, STYLE_PRESET_COUNT } from "./stylePresets";
 
 export class ShortagSettingTab extends PluginSettingTab {
 	plugin: ShortagPlugin;
@@ -122,6 +126,63 @@ export class ShortagSettingTab extends PluginSettingTab {
 		);
 		this.addStyleTextSetting("Hoekradius", "borderRadius", "4px");
 		this.addStyleTextSetting("Padding", "padding", "0 4px");
+
+		containerEl.createEl("h3", { text: "Styling-presets" });
+		containerEl.createEl("p", {
+			cls: "setting-item-description",
+			text: "Bewaar de huidige styling (kleuren, radius, padding en toggle eigen styling) in een van twee slots en zet die later met één klik terug.",
+		});
+
+		for (let i = 0; i < STYLE_PRESET_COUNT; i++) {
+			this.addStylePresetSlot(i);
+		}
+	}
+
+	private addStylePresetSlot(index: number): void {
+		const slotLabel = `Preset ${index + 1}`;
+		const preset = this.plugin.settings.stylePresets[index] ?? null;
+
+		new Setting(this.containerEl)
+			.setName(slotLabel)
+			.setDesc(presetSummary(preset))
+			.addButton((btn) =>
+				btn
+					.setButtonText("Opslaan")
+					.setTooltip("Huidige styling in dit preset-slot zetten")
+					.onClick(async () => {
+						this.plugin.settings.stylePresets[index] =
+							captureStylePreset(this.plugin.settings);
+						await this.plugin.saveSettings();
+						this.display();
+					}),
+			)
+			.addButton((btn) => {
+				btn
+					.setButtonText("Toepassen")
+					.setTooltip("Opgeslagen preset laden")
+					.setDisabled(!preset);
+				btn.onClick(async () => {
+					const saved = this.plugin.settings.stylePresets[index];
+					if (!saved) return;
+					applyStylePreset(this.plugin.settings, saved);
+					this.plugin.settings.style = normalizeStyleSettings(
+						this.plugin.settings.style,
+					);
+					await this.plugin.saveSettings();
+					this.display();
+				});
+			})
+			.addButton((btn) => {
+				btn
+					.setButtonText("Wissen")
+					.setTooltip("Preset-slot leegmaken")
+					.setDisabled(!preset);
+				btn.onClick(async () => {
+					this.plugin.settings.stylePresets[index] = null;
+					await this.plugin.saveSettings();
+					this.display();
+				});
+			});
 	}
 
 	private addStyleColorSetting(
